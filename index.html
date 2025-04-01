@@ -61,11 +61,21 @@
       <div class="flex h-12 px-6 my-8 w-full gap-2 h-[4.25rem]">
         <button id="calculate-results" form="investment-form"
         class="w-1/2 rounded-lg bg-emerald-950 text-slate-200 hover:bg-emerald-800">Calcular</button>
-        <button class="w-1/2 rounded-lg hover:bg-emerald-500" id="clear-form" form="investment-form">Limpar</button>
+        <button class="w-1/2 rounded-lg hover:bg-emerald-500" id="clear-form" form="investment-form">
+          Limpar</button>
       </div>
     </aside>
-    <main>
-      <p>resultados</p>
+    <main class="h-full">
+      <section id="charts-container">
+        <div class="h-[36dvh]">
+          <p>Resultado final</p>
+        <canvas id="final-money-distribution"></canvas>
+      </div>
+        <div class="h-[56dvh]">
+          <p>Progressão</p>
+        <canvas id="progression"></canvas>
+        </div>
+      </section>
     </main>
   <script type="module" src="main.js"></script>
   </body>

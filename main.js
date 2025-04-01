@@ -1,13 +1,23 @@
 import { generateReturnsArray } from "./src/investmentGoals";
+import {Chart} from "chart.js/auto";
 
+
+const finalMoneyChart = document.getElementById("final-money-distribution");
+const progressionChart = document.getElementById("progression");
 const form = document.getElementById('investment-form');
-const clearFormButton = document.getElementById('clear-form')
+const clearFormButton = document.getElementById('clear-form');
+let doughnutChartReference = {};
+let progressionChartReference = {};
 
+function formatCurrency(value) {
+        return value.toFixed(2)
+}
 function renderProgression(evt) {
     evt.preventDefault();
     if (document.querySelector('.error')) {
         return;
     }
+    resetCharts();
     const startingAmount = Number(document.getElementById('starting-amount').value.replace(",", "."));
     const additionalContribution = Number(document.getElementById('additional-contribution').value.replace(",", "."));
     const timeAmount = Number(document.getElementById('time-amount').value);
@@ -16,9 +26,74 @@ function renderProgression(evt) {
     const returnRatePeriod = document.getElementById('evaluation-period').value;
     const taxRate = Number(document.getElementById('tax-rate').value.replace(",", "."));
 
-    const returnsArray = generateReturnsArray(startingAmount, timeAmount, timeAmountPeriod, additionalContribution, returnRate, returnRatePeriod);
+    const returnsArray = generateReturnsArray(startingAmount, timeAmount, 
+        timeAmountPeriod, additionalContribution, returnRate, returnRatePeriod);
 
-    console.log(returnsArray);
+        const finalInvestmentObject = returnsArray[returnsArray.length -1];
+
+      doughnutChartReference = new Chart(finalMoneyChart, {
+            type: "doughnut",
+            data: {
+                labels: ["Total Investido", "Rendimento", "Imposto"],
+                datasets: [
+                    {
+                        data: [
+                           formatCurrency(finalInvestmentObject.investedAmount),
+                            formatCurrency(finalInvestmentObject.totalInterestReturns * (1 - taxRate / 100)),
+                            formatCurrency(finalInvestmentObject.totalInterestReturns * (taxRate / 100)),
+                        ],
+                        backgroundColor: [
+                            "rgb(255, 99, 132)",
+                            "rgb(54, 162, 235)",
+                            "rgb(255, 205, 86)",
+                        ],
+                        hoverOffset: 4,
+                    },
+                ],
+            },
+        });
+
+     progressionChartReference = new Chart(progressionChart, {
+            type: 'bar',
+            data: { 
+                labels: returnsArray.map((finalInvestmentObject => finalInvestmentObject.month)),
+                datasets: [{
+                    label: 'Total Investido',
+                    data: returnsArray.map((finalInvestmentObject) => formatCurrency(finalInvestmentObject.investedAmount)),
+                    backgroundColor: "rgb(255, 99, 132)",
+
+                },{
+                    label: 'Retorno do Investimento',
+                    data: returnsArray.map((finalInvestmentObject) => formatCurrency(finalInvestmentObject.interestReturns)),
+                    backgroundColor:"rgb(54, 162, 235)",
+                }]
+
+            },
+            options: {
+                responsive: true,
+                scales: {
+                  x: {
+                    stacked: true,
+                  },
+                  y: {
+                    stacked: true
+                  }
+                }
+            }
+        })
+    
+    }
+
+
+ function  isObjectEMpty(ob) {
+    return Object.keys(ob).length === 0;
+ }
+
+function resetCharts() {
+    if(!isObjectEMpty(doughnutChartReference) && !isObjectEMpty(progressionChartReference)) {
+        doughnutChartReference.destroy();
+        progressionChartReference.destroy ();
+}
 }
 
 function clearform() {
@@ -27,7 +102,7 @@ function clearform() {
     form['time-amount'].value = '';
     form['return-rate'].value = '';
     form['tax-rate'].value = '';
-
+    resetCharts();
   const errorInputsContainers =  document.querySelectorAll('.error');
 
   for (const errorInputContainer of errorInputsContainers) {
